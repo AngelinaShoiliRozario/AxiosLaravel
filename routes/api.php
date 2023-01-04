@@ -1,5 +1,7 @@
 <?php
 
+use App\Category;
+use Illuminate\Http\Client\ResponseSequence;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -16,4 +18,17 @@ use Illuminate\Support\Facades\Route;
 
 Route::middleware('auth:api')->get('/user', function (Request $request) {
     return $request->user();
+});
+Route::get('/category', function () {
+    $categories = Category::all();
+    return response()->json($categories);
+});
+Route::post('/post_category', function (Request $request) {
+    $request->validate([
+    'name' =>'required',
+    ]);
+    Category::create([
+        'name' => $request->name,
+    ]);
+    return response()->json($request->name);
 });
