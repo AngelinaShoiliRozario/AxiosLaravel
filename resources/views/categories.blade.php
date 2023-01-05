@@ -14,10 +14,13 @@
     <!-- CSRF Token -->
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <script src="{{ asset('js/app.js') }}"></script>
+  
+
 </head>
 
 <body>
     <h1>Category Blade</h1>
+  
     @php
         $categories = \App\Category::all();
     @endphp
@@ -25,23 +28,15 @@
         <table class="table table-bordered" style="width: 50%;">
             <thead>
                 <tr>
+                    <th>Serial</th>
                     <th>ID#</th>
                     <th>Name</th>
                     <th>Actions</th>
                 </tr>
 
             </thead>
-            <tbody>
-                @foreach ($categories as $category)
-                    <tr>
-                        <td>{{ $category->id }}</td>
-                        <td>{{ $category->name }}</td>
-                        <td>
-                            <button class="btn btn-primary">Edit</button>
-                            <button class="btn btn-danger">Delete</button>
-                        </td>
-                    </tr>
-                @endforeach
+            <tbody id="tBody">
+                
 
             </tbody>
         </table>
@@ -50,10 +45,10 @@
     <form id="submitCategory">
         <div class="col-12">
             <div class="">
-                <label for="name">Name</label>
+                 <label for="name">Name</label>
                 <span id="error" class="text-danger"></span>
                 <input id="name" type="text" placeholder="Enter Category Name" class="form-control">
-                <button type="submit">Submit</button>
+                <button type="submit" class="btn btn-dark">Submit</button>
             </div>
         </div>
 
@@ -71,8 +66,42 @@
 
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
     <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+     {{-- sweet alert --}}
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@8"></script>
     <script>
-        console.log('hello');
+         const table_data_row = (data) => {
+            var	rows = '';
+            var i = 0;
+            $.each( data, function( key, value ) {
+                value.id
+                rows = rows + '<tr>';
+                rows = rows + '<td>'+ ++i +'</td>';
+                rows = rows + '<td>'+value.id+'</td>';
+                rows = rows + '<td>'+value.name+'</td>';
+                
+                rows = rows + '<td data-id="'+value.id+'" class="text-center">';
+                rows = rows + '<a class="btn btn-sm btn-info text-light" id="editRow" data-id="'+value.id+'" data-toggle="modal" data-target="#editModal">Edit</a> ';
+                rows = rows + '<a class="btn btn-sm btn-danger text-light"  id="deleteRow" data-id="'+value.id+'" >Delete</a> ';
+                rows = rows + '</td>';
+                rows = rows + '</tr>';
+            });
+            $("#tBody").html(rows);
+    }
+        const getAllCategory = ()=>{
+            
+            axios.get("{{ url('/api/category') }}")
+               .then((response)=>{
+                
+                    if(response.status === 200){
+                    console.log(response);  
+                    table_data_row(response.data);  
+                    }})
+                        .catch((error)=>{
+                            console.log(error);
+                        });
+        };
+        getAllCategory();
+
         $('body').on('submit', '#submitCategory', function(e) {
             e.preventDefault();
             console.log('okk');
@@ -80,25 +109,28 @@
                 name: $('#name').val(),
             }).then((response) => {
                     console.log(response);
-                }
-                Swal.fire({
+                    Swal.fire({
                     icon:'success',
                     title:'Success',
                     text:'Category Successfully Created',
-                    footer:'<a href="">this is just a link</a>',
+                    
                 });
-
+                getAllCategory();
+            }
+                
             ).catch((error) => {
-                console.log(error.response.data.errors.name[0]);
-                if(error.response.data.errors.name[0]){
+               console.log(error);
+          
+            if(error.response.data.errors.name){
                     $('#error').text(error.response.data.errors.name[0]);
                 }
+          
+                
             });
         });
     </script>
 
-    {{-- sweet alert --}}
-    <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
+   
 
     
 </body>
